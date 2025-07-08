@@ -52,17 +52,12 @@ export default function Home() {
     setInput('');
   };
 
-  const handleParkClick = (park) => {
-    if (selectedParks.includes(park)) return;
+const handleParkClick = (park) => {
+  setSelectedParks((prev) =>
+    prev.includes(park) ? prev.filter((p) => p !== park) : [...prev, park]
+  );
+};
 
-    const newSelections = [...selectedParks, park];
-    setSelectedParks(newSelections);
-    setMessages((prev) => [
-      ...prev,
-      { from: 'user', text: park },
-      { from: 'bot', text: `${park} is a great choice! Pick more or type "done" to move on.` },
-    ]);
-  };
 
   return (
     <>
