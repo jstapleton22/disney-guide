@@ -93,13 +93,21 @@ const handleParkClick = (park) => {
          {awaitingParkSelection && (
   <div style={styles.buttonGroup}>
     {['Magic Kingdom', 'EPCOT', 'Hollywood Studios', 'Animal Kingdom'].map((park) => (
-      <button
-        key={park}
-        style={styles.parkButton}
-        onClick={() => handleParkClick(park)}
-      >
-        {park}
-      </button>
+     const isSelected = selectedParks.includes(park);
+
+<button
+  key={park}
+  onClick={() => handleParkClick(park)}
+  style={{
+    ...styles.parkButton,
+    backgroundColor: isSelected ? '#0070f3' : '#f0f0f0',
+    color: isSelected ? '#fff' : '#000',
+    fontWeight: isSelected ? 'bold' : 'normal',
+  }}
+>
+  {park}
+</button>
+
     ))}
 
     {/* ✅  new “Done” button */}
