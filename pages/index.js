@@ -8,6 +8,7 @@ export default function Home() {
   ]);
   const [input, setInput] = useState('');
   const [awaitingParkSelection, setAwaitingParkSelection] = useState(false);
+  const [awaitingGroupInfo, setAwaitingGroupInfo] = useState(false);
   const [selectedParks, setSelectedParks] = useState([]);
 
   const handleStart = () => {
@@ -23,41 +24,57 @@ export default function Home() {
     const inputLower = input.toLowerCase();
     let botReply = '';
 
+    if (awaitingGroupInfo) {
+      setMessages((prev) => [
+        ...prev,
+        { from: 'user', text: input },
+        {
+          from: 'bot',
+          text: `Thanks! Here's a sample plan for your first park day at ${selectedParks[0]} 📏`,
+        },
+        {
+          from: 'bot',
+          text: generateSampleItinerary(selectedParks[0]),
+        },
+      ]);
+
+      setAwaitingGroupInfo(false);
+      setInput('');
+      return;
+    }
+
     if (messages.length === 1) {
-      // First response: knowledge check
       if (inputLower.includes('never') || inputLower.includes("don't know") || inputLower.includes('not much')) {
         botReply = `No worries! There are four main parks: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom. I can help you pick!`;
       } else {
         botReply = `Awesome! Any favorite parks or must-do rides already in mind?`;
       }
       setMessages([...newMessages, { from: 'bot', text: botReply }]);
-      setAwaitingParkSelection(true); // now show buttons
-} else {
-  let newBotMessages = [];
+      setAwaitingParkSelection(true);
+    } else {
+      let newBotMessages = [];
 
-  if (inputLower.includes('done')) {
-    setAwaitingParkSelection(false);
-    newBotMessages.push({ from: 'bot', text: `Got it! We’ll move on from park picks.` });
-  }
+      if (inputLower.includes('done')) {
+        setAwaitingParkSelection(false);
+        newBotMessages.push({ from: 'bot', text: `Got it! We’ll move on from park picks.` });
+      }
 
-  newBotMessages.push({
-    from: 'bot',
-    text: `Want to tell me about your group or what kind of experience you're hoping for?`,
-  });
+      newBotMessages.push({
+        from: 'bot',
+        text: `Want to tell me about your group or what kind of experience you're hoping for?`,
+      });
 
-  setMessages([...newMessages, ...newBotMessages]);
-}
-
+      setMessages([...newMessages, ...newBotMessages]);
+    }
 
     setInput('');
   };
 
-const handleParkClick = (park) => {
-  setSelectedParks((prev) =>
-    prev.includes(park) ? prev.filter((p) => p !== park) : [...prev, park]
-  );
-};
-
+  const handleParkClick = (park) => {
+    setSelectedParks((prev) =>
+      prev.includes(park) ? prev.filter((p) => p !== park) : [...prev, park]
+    );
+  };
 
   return (
     <>
@@ -90,61 +107,56 @@ const handleParkClick = (park) => {
               </p>
             ))}
 
-         {awaitingParkSelection && (
-  <div style={styles.buttonGroup}>
-{['Magic Kingdom', 'EPCOT', 'Hollywood Studios', 'Animal Kingdom'].map((park) => {
-  const isSelected = selectedParks.includes(park);
-  return (
-    <button
-      key={park}
-      onClick={() => handleParkClick(park)}
-      style={{
-        padding: '0.5rem 1rem',
-        margin: '0.5rem',
-        borderRadius: '8px',
-        border: '1px solid #ccc',
-        cursor: 'pointer',
-        backgroundColor: isSelected ? '#0070f3' : '#f0f0f0',
-        color: isSelected ? '#fff' : '#000',
-        fontWeight: isSelected ? 'bold' : 'normal',
-        boxShadow: isSelected ? '0 0 6px rgba(0, 112, 243, 0.5)' : 'none',
-        transition: 'all 0.2s ease-in-out',
-      }}
-    >
-      {park}
-    </button>
-  );
-})}
+            {awaitingParkSelection && (
+              <div style={styles.buttonGroup}>
+                {['Magic Kingdom', 'EPCOT', 'Hollywood Studios', 'Animal Kingdom'].map((park) => {
+                  const isSelected = selectedParks.includes(park);
+                  return (
+                    <button
+                      key={park}
+                      onClick={() => handleParkClick(park)}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        margin: '0.5rem',
+                        borderRadius: '8px',
+                        border: '1px solid #ccc',
+                        cursor: 'pointer',
+                        backgroundColor: isSelected ? '#0070f3' : '#f0f0f0',
+                        color: isSelected ? '#fff' : '#000',
+                        fontWeight: isSelected ? 'bold' : 'normal',
+                        boxShadow: isSelected ? '0 0 6px rgba(0, 112, 243, 0.5)' : 'none',
+                        transition: 'all 0.2s ease-in-out',
+                      }}
+                    >
+                      {park}
+                    </button>
+                  );
+                })}
 
-
-    {/* ✅  new “Done” button */}
-    <button
-      style={{
-        ...styles.parkButton,
-        backgroundColor: '#0070f3',
-        color: '#fff',
-        marginTop: '8px',
-      }}
-      onClick={() => {
-        setAwaitingParkSelection(false);              // hide the park buttons
-  setMessages((prev) => [
-  ...prev,
-  { from: 'user', text: `I picked: ${selectedParks.join(', ')}` },
-  {
-    from: 'bot',
-    text: "Great picks! Now tell me: how many adults, how many kids, and any special needs I should keep in mind?",
-  },
-]);
-
-setAwaitingGroupInfo(true); // add a new state if you want to branch logic later
-
-      }}
-    >
-      ✅ Done
-    </button>
-  </div>
-)}
-
+                <button
+                  style={{
+                    ...styles.parkButton,
+                    backgroundColor: '#0070f3',
+                    color: '#fff',
+                    marginTop: '8px',
+                  }}
+                  onClick={() => {
+                    setAwaitingParkSelection(false);
+                    setMessages((prev) => [
+                      ...prev,
+                      { from: 'user', text: `I picked: ${selectedParks.join(', ')}` },
+                      {
+                        from: 'bot',
+                        text: 'Great picks! Now tell me: how many adults, how many kids, and any special needs I should keep in mind?',
+                      },
+                    ]);
+                    setAwaitingGroupInfo(true);
+                  }}
+                >
+                  ✅ Done
+                </button>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} style={styles.form}>
               <input
@@ -163,6 +175,31 @@ setAwaitingGroupInfo(true); // add a new state if you want to branch logic later
       </main>
     </>
   );
+}
+
+function generateSampleItinerary(park) {
+  if (park === 'Magic Kingdom') {
+    return `🗓️ Magic Kingdom Day Plan:
+- 🎠 Rope drop: Peter Pan’s Flight
+- ☕ 10:30am: Snack break at Sleepy Hollow
+- 🐘 11:15am: Dumbo the Flying Elephant
+- 🍔 12:30pm: Lunch at Cosmic Ray’s
+- 🏯 2:00pm: Rest break + character spotting near the castle
+- 🚂 3:30pm: Jungle Cruise
+- 🍦 5:00pm: Dole Whip at Aloha Isle
+- 🎆 8:00pm: Fireworks from Main Street`;
+  } else if (park === 'EPCOT') {
+    return `🗓️ EPCOT Day Plan:
+- 🚀 Rope drop: Soarin’
+- ☕ 10:15am: Joffrey’s coffee break
+- 🧪 11:00am: Journey into Imagination
+- 🍣 12:30pm: Lunch in Japan Pavilion
+- 🌍 2:00pm: Kidcot World Showcase scavenger hunt
+- 🍰 4:00pm: Pastries in France
+- 🎆 8:00pm: Luminous fireworks show`;
+  } else {
+    return `🗓️ ${park} sample plan coming soon!`;
+  }
 }
 
 const styles = {
