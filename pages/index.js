@@ -46,4 +46,138 @@ export default function Home() {
 
     const newSelections = [...selectedParks, park];
     setSelectedParks(newSelections);
-    setMessages(
+    setMessages((prev) => [
+      ...prev,
+      { from: 'user', text: park },
+      { from: 'bot', text: `${park} is a great choice! Pick more or type "done" to move on.` },
+    ]);
+  };
+
+  return (
+    <>
+      <Head>
+        <title>Disney Guide</title>
+        <meta name="description" content="Your AI-powered Disney trip planner" />
+      </Head>
+
+      <main style={styles.main}>
+        <h1 style={styles.title}>Disney Guide</h1>
+        <p style={styles.subtitle}>Your AI-powered assistant for planning the ultimate Disney vacation.</p>
+
+        {!started ? (
+          <button style={styles.button} onClick={handleStart}>
+            Plan My Trip
+          </button>
+        ) : (
+          <div style={styles.chatContainer}>
+            {messages.map((msg, i) => (
+              <p
+                key={i}
+                style={{
+                  ...styles.message,
+                  alignSelf: msg.from === 'user' ? 'flex-end' : 'flex-start',
+                  backgroundColor: msg.from === 'user' ? '#0070f3' : '#eee',
+                  color: msg.from === 'user' ? '#fff' : '#000',
+                }}
+              >
+                {msg.text}
+              </p>
+            ))}
+
+            {awaitingParkSelection && (
+              <div style={styles.buttonGroup}>
+                {['Magic Kingdom', 'EPCOT', 'Hollywood Studios', 'Animal Kingdom'].map((park) => (
+                  <button key={park} style={styles.parkButton} onClick={() => handleParkClick(park)}>
+                    {park}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} style={styles.form}>
+              <input
+                type="text"
+                placeholder="Type your reply..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                style={styles.input}
+              />
+              <button type="submit" style={styles.button}>Send</button>
+            </form>
+          </div>
+        )}
+
+        <p style={styles.footnote}>Made with ❤️ by someone who really gets Disney planning.</p>
+      </main>
+    </>
+  );
+}
+
+const styles = {
+  main: {
+    minHeight: '100vh',
+    padding: '2rem 1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  title: { fontSize: '3rem', marginBottom: 0 },
+  subtitle: { fontSize: '1.2rem', margin: '1rem 0 2rem', textAlign: 'center', maxWidth: '500px' },
+  button: {
+    padding: '0.75rem 1.5rem',
+    fontSize: '1rem',
+    backgroundColor: '#0070f3',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    marginTop: '1rem',
+  },
+  parkButton: {
+    padding: '0.5rem 1rem',
+    margin: '0.25rem',
+    fontSize: '0.9rem',
+    backgroundColor: '#eee',
+    border: '1px solid #ccc',
+    borderRadius: '6px',
+    cursor: 'pointer',
+  },
+  buttonGroup: {
+    marginTop: '1rem',
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.5rem',
+    justifyContent: 'center',
+  },
+  chatContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+    width: '100%',
+    maxWidth: '600px',
+  },
+  message: {
+    padding: '0.75rem 1rem',
+    borderRadius: '12px',
+    maxWidth: '80%',
+    marginBottom: '0.5rem',
+  },
+  form: {
+    display: 'flex',
+    gap: '0.5rem',
+    marginTop: '1rem',
+  },
+  input: {
+    flexGrow: 1,
+    padding: '0.75rem',
+    fontSize: '1rem',
+    borderRadius: '6px',
+    border: '1px solid #ccc',
+  },
+  footnote: {
+    marginTop: '3rem',
+    fontSize: '0.8rem',
+    color: '#666',
+    textAlign: 'center',
+  },
+};
