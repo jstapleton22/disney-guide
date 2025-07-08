@@ -7,6 +7,8 @@ export default function Home() {
     { from: 'bot', text: 'Before we dive in, how familiar are you with Disney World and its parks?' },
   ]);
   const [input, setInput] = useState('');
+  const [awaitingParkSelection, setAwaitingParkSelection] = useState(false);
+  const [selectedParks, setSelectedParks] = useState([]);
 
   const handleStart = () => {
     setStarted(true);
@@ -18,25 +20,30 @@ export default function Home() {
 
     const userMessage = { from: 'user', text: input };
     const newMessages = [...messages, userMessage];
-
-    // Super basic logic – can expand later
+    const inputLower = input.toLowerCase();
     let botReply = '';
 
-    const inputLower = input.toLowerCase();
-    if (inputLower.includes('never') || inputLower.includes("don't know") || inputLower.includes('not much')) {
-      botReply = `No worries! There are four main parks—Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom. Want help picking the best ones for your trip?`;
-    } else if (inputLower.includes('yes') || inputLower.includes('been') || inputLower.includes('know')) {
-      botReply = `Awesome! Any favorite parks or must-do rides already in mind?`;
+    if (messages.length === 1) {
+      // First response: knowledge check
+      if (inputLower.includes('never') || inputLower.includes("don't know") || inputLower.includes('not much')) {
+        botReply = `No worries! There are four main parks: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom. I can help you pick!`;
+      } else {
+        botReply = `Awesome! Any favorite parks or must-do rides already in mind?`;
+      }
+      setMessages([...newMessages, { from: 'bot', text: botReply }]);
+      setAwaitingParkSelection(true); // now show buttons
     } else {
-      botReply = `Got it. Want to tell me more about your group or what kind of experience you're hoping for?`;
+      // Other messages after park selection
+      botReply = `Thanks! I’ll keep that in mind. Want to tell me about your group or what kind of experience you're hoping for?`;
+      setMessages([...newMessages, { from: 'bot', text: botReply }]);
     }
 
-    setMessages([...newMessages, { from: 'bot', text: botReply }]);
     setInput('');
   };
 
-  return (
-    <>
-      <Head>
-        <title>Disney Guide</title>
-        <meta name="description" content="You
+  const handleParkClick = (park) => {
+    if (selectedParks.includes(park)) return;
+
+    const newSelections = [...selectedParks, park];
+    setSelectedParks(newSelections);
+    setMessages(
