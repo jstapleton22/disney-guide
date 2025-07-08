@@ -127,15 +127,17 @@ const handleParkClick = (park) => {
       }}
       onClick={() => {
         setAwaitingParkSelection(false);              // hide the park buttons
-        setMessages((prev) => [
-          ...prev,
-          { from: 'user', text: 'Done choosing parks' },
-          {
-            from: 'bot',
-            text:
-              "Got it! Who’s coming on the trip? (Any kids, adults, or special needs I should know about?)",
-          },
-        ]);
+  setMessages((prev) => [
+  ...prev,
+  { from: 'user', text: `I picked: ${selectedParks.join(', ')}` },
+  {
+    from: 'bot',
+    text: "Great picks! Now tell me: how many adults, how many kids, and any special needs I should keep in mind?",
+  },
+]);
+
+setAwaitingGroupInfo(true); // add a new state if you want to branch logic later
+
       }}
     >
       ✅ Done
