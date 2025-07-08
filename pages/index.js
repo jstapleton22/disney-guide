@@ -9,6 +9,7 @@ export default function Home() {
   const [input, setInput] = useState('');
   const [awaitingParkSelection, setAwaitingParkSelection] = useState(false);
   const [awaitingGroupInfo, setAwaitingGroupInfo] = useState(false);
+  const [awaitingFirstPark, setAwaitingFirstPark] = useState(false);
   const [selectedParks, setSelectedParks] = useState([]);
 
   const handleStart = () => {
