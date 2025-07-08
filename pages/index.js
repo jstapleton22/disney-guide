@@ -23,47 +23,50 @@ export default function Home() {
     const userMessage = { from: 'user', text: input };
     const newMessages = [...messages, userMessage];
     const inputLower = input.toLowerCase();
-    let botReply = '';
 
     if (awaitingGroupInfo) {
-  setMessages((prev) => [
-    ...prev,
-    { from: 'user', text: input },
-    {
-      from: 'bot',
-      text: `Thanks! Now, which park should we plan for first?`,
-    },
-  ]);
-
-  setAwaitingGroupInfo(false);
-  setAwaitingFirstPark(true);
-  setInput('');
-  return;
-}
-
-
-    if (messages.length === 1) {
-      if (inputLower.includes('never') || inputLower.includes("don't know") || inputLower.includes('not much')) {
-        botReply = `No worries! There are four main parks: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom. I can help you pick!`;
+      setMessages([
+        ...newMessages,
+        { from: 'bot', text: 'Thanks! Now, which park should we plan for first?' }
+      ]);
+      setAwaitingGroupInfo(false);
+      setAwaitingFirstPark(true);
+    } else if (awaitingFirstPark) {
+      const selected = input.trim();
+      setMessages([
+        ...newMessages,
+        { from: 'bot', text: `Perfect. Let's start building a plan for ${selected}!` }
+      ]);
+      setAwaitingFirstPark(false);
+    } else if (messages.length === 1) {
+      if (
+        inputLower.includes('never') ||
+        inputLower.includes("don't know") ||
+        inputLower.includes('not much')
+      ) {
+        setMessages([
+          ...newMessages,
+          {
+            from: 'bot',
+            text:
+              'No worries! There are four main parks: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom. I can help you pick!',
+          },
+        ]);
       } else {
-        botReply = `Awesome! Any favorite parks or must-do rides already in mind?`;
+        setMessages([
+          ...newMessages,
+          { from: 'bot', text: 'Awesome! Any favorite parks or must-do rides already in mind?' },
+        ]);
       }
-      setMessages([...newMessages, { from: 'bot', text: botReply }]);
       setAwaitingParkSelection(true);
     } else {
-      let newBotMessages = [];
-
-      if (inputLower.includes('done')) {
-        setAwaitingParkSelection(false);
-        newBotMessages.push({ from: 'bot', text: `Got it! We’ll move on from park picks.` });
-      }
-
-      newBotMessages.push({
-        from: 'bot',
-        text: `Want to tell me about your group or what kind of experience you're hoping for?`,
-      });
-
-      setMessages([...newMessages, ...newBotMessages]);
+      setMessages([
+        ...newMessages,
+        {
+          from: 'bot',
+          text: `Want to tell me about your group or what kind of experience you're hoping for?`,
+        },
+      ]);
     }
 
     setInput('');
