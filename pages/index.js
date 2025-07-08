@@ -197,7 +197,7 @@ export default function Home() {
           </div>
         )}
 
-        <p style={styles.footnote}>Made with ❤️ by someone who really gets Disney planning.</p>
+        <p style={styles.footnote}>Made with ❤️ by Jamie Stapleton.</p>
       </main>
     </>
   );
