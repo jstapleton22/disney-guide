@@ -32,11 +32,22 @@ export default function Home() {
       }
       setMessages([...newMessages, { from: 'bot', text: botReply }]);
       setAwaitingParkSelection(true); // now show buttons
-    } else {
-      // Other messages after park selection
-      botReply = `Thanks! I’ll keep that in mind. Want to tell me about your group or what kind of experience you're hoping for?`;
-      setMessages([...newMessages, { from: 'bot', text: botReply }]);
-    }
+} else {
+  let newBotMessages = [];
+
+  if (inputLower.includes('done')) {
+    setAwaitingParkSelection(false);
+    newBotMessages.push({ from: 'bot', text: `Got it! We’ll move on from park picks.` });
+  }
+
+  newBotMessages.push({
+    from: 'bot',
+    text: `Want to tell me about your group or what kind of experience you're hoping for?`,
+  });
+
+  setMessages([...newMessages, ...newBotMessages]);
+}
+
 
     setInput('');
   };
