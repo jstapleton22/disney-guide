@@ -95,15 +95,44 @@ export default function Home() {
               </p>
             ))}
 
-            {awaitingParkSelection && (
-              <div style={styles.buttonGroup}>
-                {['Magic Kingdom', 'EPCOT', 'Hollywood Studios', 'Animal Kingdom'].map((park) => (
-                  <button key={park} style={styles.parkButton} onClick={() => handleParkClick(park)}>
-                    {park}
-                  </button>
-                ))}
-              </div>
-            )}
+         {awaitingParkSelection && (
+  <div style={styles.buttonGroup}>
+    {['Magic Kingdom', 'EPCOT', 'Hollywood Studios', 'Animal Kingdom'].map((park) => (
+      <button
+        key={park}
+        style={styles.parkButton}
+        onClick={() => handleParkClick(park)}
+      >
+        {park}
+      </button>
+    ))}
+
+    {/* ✅  new “Done” button */}
+    <button
+      style={{
+        ...styles.parkButton,
+        backgroundColor: '#0070f3',
+        color: '#fff',
+        marginTop: '8px',
+      }}
+      onClick={() => {
+        setAwaitingParkSelection(false);              // hide the park buttons
+        setMessages((prev) => [
+          ...prev,
+          { from: 'user', text: 'Done choosing parks' },
+          {
+            from: 'bot',
+            text:
+              "Got it! Who’s coming on the trip? (Any kids, adults, or special needs I should know about?)",
+          },
+        ]);
+      }}
+    >
+      ✅ Done
+    </button>
+  </div>
+)}
+
 
             <form onSubmit={handleSubmit} style={styles.form}>
               <input
