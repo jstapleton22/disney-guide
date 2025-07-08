@@ -25,23 +25,21 @@ export default function Home() {
     let botReply = '';
 
     if (awaitingGroupInfo) {
-      setMessages((prev) => [
-        ...prev,
-        { from: 'user', text: input },
-        {
-          from: 'bot',
-          text: `Thanks! Here's a sample plan for your first park day at ${selectedParks[0]} 📏`,
-        },
-        {
-          from: 'bot',
-          text: generateSampleItinerary(selectedParks[0]),
-        },
-      ]);
+  setMessages((prev) => [
+    ...prev,
+    { from: 'user', text: input },
+    {
+      from: 'bot',
+      text: `Thanks! Now, which park should we plan for first?`,
+    },
+  ]);
 
-      setAwaitingGroupInfo(false);
-      setInput('');
-      return;
-    }
+  setAwaitingGroupInfo(false);
+  setAwaitingFirstPark(true);
+  setInput('');
+  return;
+}
+
 
     if (messages.length === 1) {
       if (inputLower.includes('never') || inputLower.includes("don't know") || inputLower.includes('not much')) {
