@@ -32,44 +32,39 @@ export default function Home() {
     if (!input.trim()) return;
 
     const userMessage = { from: 'user', text: input };
-    const newMessages = [...messages, userMessage];
     const inputLower = input.toLowerCase();
+    let newMessages = [...messages, userMessage];
 
     if (awaitingGroupInfo) {
       setMessages((prev) => [
         ...prev,
         { from: 'user', text: input },
-        {
-          from: 'bot',
-          text: `Thanks! Now, which park should we plan for first?`,
-        },
+        { from: 'bot', text: `Thanks! Now, which park should we plan for first?` },
       ]);
-
       setAwaitingGroupInfo(false);
-      setAwaitingFirstPark(true); // ✅ FIXED typo here
+      setAwaitingFirstPark(true);
       setInput('');
       return;
     }
 
     if (awaitingFirstPark) {
-      const selectedFirstPark = input;
       const userMsg = { from: 'user', text: input };
-
       setMessages((prev) => [...prev, userMsg, { from: 'bot', text: "Planning now..." }]);
 
-      try {
-        const data = await callLLM(`Create a detailed day itinerary for ${selectedFirstPark} at Walt Disney World. Make it fun and family-friendly.`);
+      const res = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: `Create a detailed day itinerary for ${input} at Walt Disney World. Make it fun and family-friendly.`,
+        }),
+      });
 
-        setMessages((prev) => [
-          ...prev.slice(0, -1),
-          { from: 'bot', text: data || 'Sorry, something went wrong.' },
-        ]);
-      } catch (error) {
-        setMessages((prev) => [
-          ...prev.slice(0, -1),
-          { from: 'bot', text: 'Oops! There was a problem getting your itinerary.' },
-        ]);
-      }
+      const data = await res.json();
+
+      setMessages((prev) => [
+        ...prev.slice(0, -1),
+        { from: 'bot', text: data.result || 'Sorry, something went wrong.' },
+      ]);
 
       setAwaitingFirstPark(false);
       setInput('');
@@ -78,27 +73,26 @@ export default function Home() {
 
     if (messages.length === 1) {
       let botReply = '';
-      if (inputLower.includes('never') || inputLower.includes("don't know") || inputLower.includes('not much')) {
+      if (
+        inputLower.includes('never') ||
+        inputLower.includes("don't know") ||
+        inputLower.includes('not much')
+      ) {
         botReply = `No worries! There are four main parks: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom. I can help you pick!`;
       } else {
         botReply = `Awesome! Any favorite parks or must-do rides already in mind?`;
       }
+
       setMessages([...newMessages, { from: 'bot', text: botReply }]);
       setAwaitingParkSelection(true);
     } else {
-      let newBotMessages = [];
-
-      if (inputLower.includes('done')) {
-        setAwaitingParkSelection(false);
-        newBotMessages.push({ from: 'bot', text: `Got it! We’ll move on from park picks.` });
-      }
-
-      newBotMessages.push({
-        from: 'bot',
-        text: `Want to tell me about your group or what kind of experience you're hoping for?`,
-      });
-
-      setMessages([...newMessages, ...newBotMessages]);
+      setMessages([
+        ...newMessages,
+        {
+          from: 'bot',
+          text: `Want to tell me about your group or what kind of experience you're hoping for?`,
+        },
+      ]);
     }
 
     setInput('');
