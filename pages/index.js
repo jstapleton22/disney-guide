@@ -35,21 +35,21 @@ export default function Home() {
     const inputLower = input.toLowerCase();
     let botReply = '';
 
-    if (awaitingGroupInfo) {
-      setMessages((prev) => [
-        ...prev,
-        { from: 'user', text: input },
-        {
-          from: 'bot',
-          text: `Thanks! Now, which park should we plan for first?`,
-        },
-      ]);
+   if (awaitingGroupInfo) {
+  setMessages((prev) => [
+    ...prev,
+    { from: 'user', text: input },
+    {
+      from: 'bot',
+      text: `Thanks! Now, which park should we plan for first?`,
+    },
+  ]);
 
-      setAwaitingGroupInfo(false);
-      setirstPark(true);
-      setInput('');
-      return;
-    }
+  setAwaitingGroupInfo(false);
+  setAwaitingFirstPark(true);
+  setInput('');
+  return;
+}
 
  if (awaitingFirstPark) {
   const selectedFirstPark = input;
