@@ -23,8 +23,13 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+
+    if (!data.choices || !data.choices[0]) {
+      return res.status(500).json({ error: 'OpenAI response malformed', details: data });
+    }
+
     res.status(200).json({ result: data.choices[0].message.content.trim() });
   } catch (err) {
-    res.status(500).json({ error: 'Something went wrong' });
+    res.status(500).json({ error: 'Something went wrong', message: err.message });
   }
 }
