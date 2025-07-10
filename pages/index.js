@@ -46,34 +46,38 @@ export default function Home() {
       ]);
 
       setAwaitingGroupInfo(false);
-      setAwaitingFirstPark(true);
+      setirstPark(true);
       setInput('');
       return;
     }
 
-    if (awaitingFirstPark) {
-      const pickedPark = selectedParks.find(
-        (p) => inputLower.includes(p.toLowerCase())
-      );
+ if (awaitingFirstPark) {
+  const selectedFirstPark = input;
+  const userMsg = { from: 'user', text: input };
 
-      if (pickedPark) {
-        const itinerary = generateSampleItinerary(pickedPark);
-        setMessages((prev) => [
-          ...prev,
-          { from: 'user', text: input },
-          { from: 'bot', text: itinerary },
-        ]);
-        setAwaitingFirstPark(false);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          { from: 'user', text: input },
-          {
-            from: 'bot',
-            text: `I didn’t catch which park—can you pick from: ${selectedParks.join(', ')}?`,
-          },
-        ]);
-      }
+  setMessages((prev) => [...prev, userMsg, { from: 'bot', text: "Planning now..." }]);
+
+  // Call your new backend API
+  const res = await fetch('/api/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      prompt: `Create a detailed day itinerary for ${selectedFirstPark} at Walt Disney World. Make it fun and family-friendly.`,
+    }),
+  });
+
+  const data = await res.json();
+
+  setMessages((prev) => [
+    ...prev.slice(0, -1), // remove "Planning now..." placeholder
+    { from: 'bot', text: data.result || 'Sorry, something went wrong.' },
+  ]);
+
+  setAwaitingFirstPark(false);
+  setInput('');
+  return;
+}
+
 
       setInput('');
       return;
