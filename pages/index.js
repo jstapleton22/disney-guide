@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Head from 'next/head';
+
 async function callLLM(prompt) {
   const response = await fetch('/api/ask', {
     method: 'POST',
@@ -26,64 +27,57 @@ export default function Home() {
     setStarted(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
 
     const userMessage = { from: 'user', text: input };
     const newMessages = [...messages, userMessage];
     const inputLower = input.toLowerCase();
-    let botReply = '';
 
-   if (awaitingGroupInfo) {
-  setMessages((prev) => [
-    ...prev,
-    { from: 'user', text: input },
-    {
-      from: 'bot',
-      text: `Thanks! Now, which park should we plan for first?`,
-    },
-  ]);
+    if (awaitingGroupInfo) {
+      setMessages((prev) => [
+        ...prev,
+        { from: 'user', text: input },
+        {
+          from: 'bot',
+          text: `Thanks! Now, which park should we plan for first?`,
+        },
+      ]);
 
-  setAwaitingGroupInfo(false);
-  setAwaitingFirstPark(true);
-  setInput('');
-  return;
-}
+      setAwaitingGroupInfo(false);
+      setAwaitingFirstPark(true); // ✅ FIXED typo here
+      setInput('');
+      return;
+    }
 
- if (awaitingFirstPark) {
-  const selectedFirstPark = input;
-  const userMsg = { from: 'user', text: input };
+    if (awaitingFirstPark) {
+      const selectedFirstPark = input;
+      const userMsg = { from: 'user', text: input };
 
-  setMessages((prev) => [...prev, userMsg, { from: 'bot', text: "Planning now..." }]);
+      setMessages((prev) => [...prev, userMsg, { from: 'bot', text: "Planning now..." }]);
 
-  // Call your new backend API
-  const res = await fetch('/api/ask', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      prompt: `Create a detailed day itinerary for ${selectedFirstPark} at Walt Disney World. Make it fun and family-friendly.`,
-    }),
-  });
+      try {
+        const data = await callLLM(`Create a detailed day itinerary for ${selectedFirstPark} at Walt Disney World. Make it fun and family-friendly.`);
 
-  const data = await res.json();
+        setMessages((prev) => [
+          ...prev.slice(0, -1),
+          { from: 'bot', text: data || 'Sorry, something went wrong.' },
+        ]);
+      } catch (error) {
+        setMessages((prev) => [
+          ...prev.slice(0, -1),
+          { from: 'bot', text: 'Oops! There was a problem getting your itinerary.' },
+        ]);
+      }
 
-  setMessages((prev) => [
-    ...prev.slice(0, -1), // remove "Planning now..." placeholder
-    { from: 'bot', text: data.result || 'Sorry, something went wrong.' },
-  ]);
-
-  setAwaitingFirstPark(false);
-  setInput('');
-  return;
-}
-
-
+      setAwaitingFirstPark(false);
       setInput('');
       return;
     }
 
     if (messages.length === 1) {
+      let botReply = '';
       if (inputLower.includes('never') || inputLower.includes("don't know") || inputLower.includes('not much')) {
         botReply = `No worries! There are four main parks: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom. I can help you pick!`;
       } else {
@@ -215,31 +209,6 @@ export default function Home() {
       </main>
     </>
   );
-}
-
-function generateSampleItinerary(park) {
-  if (park === 'Magic Kingdom') {
-    return `🗓️ Magic Kingdom Day Plan:
-- 🎠 Rope drop: Peter Pan’s Flight
-- ☕ 10:30am: Snack break at Sleepy Hollow
-- 🐘 11:15am: Dumbo the Flying Elephant
-- 🍔 12:30pm: Lunch at Cosmic Ray’s
-- 🏯 2:00pm: Rest break + character spotting near the castle
-- 🚂 3:30pm: Jungle Cruise
-- 🍦 5:00pm: Dole Whip at Aloha Isle
-- 🎆 8:00pm: Fireworks from Main Street`;
-  } else if (park === 'EPCOT') {
-    return `🗓️ EPCOT Day Plan:
-- 🚀 Rope drop: Soarin’
-- ☕ 10:15am: Joffrey’s coffee break
-- 🧪 11:00am: Journey into Imagination
-- 🍣 12:30pm: Lunch in Japan Pavilion
-- 🌍 2:00pm: Kidcot World Showcase scavenger hunt
-- 🍰 4:00pm: Pastries in France
-- 🎆 8:00pm: Luminous fireworks show`;
-  } else {
-    return `🗓️ ${park} sample plan coming soon!`;
-  }
 }
 
 const styles = {
