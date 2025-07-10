@@ -1,5 +1,15 @@
 import { useState } from 'react';
 import Head from 'next/head';
+async function callLLM(prompt) {
+  const response = await fetch('/api/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt }),
+  });
+
+  const data = await response.json();
+  return data.result;
+}
 
 export default function Home() {
   const [started, setStarted] = useState(false);
