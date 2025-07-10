@@ -199,7 +199,7 @@ export default function Home() {
           </div>
         )}
 
-        <p style={styles.footnote}>Made with ❤️ by Jamie Stapleton.</p>
+        <p style={styles.footnote}>Made with ❤️ by Jamie Toliver Stapleton.</p>
       </main>
     </>
   );
